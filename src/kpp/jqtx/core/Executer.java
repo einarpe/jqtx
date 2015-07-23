@@ -33,10 +33,12 @@ public class Executer
     {
       Node attr = child.getAttributes().getNamedItem("q:repeat");
       if (attr == null)
-        continue;
-      
-      String qrepeat = attr.getNodeValue();
-      repeat(qrepeat, (Element)child);
+        findRepeatee(child);
+      else
+      {
+        String qrepeat = attr.getNodeValue();
+        repeat(qrepeat, (Element)child);
+      }
     }
   }
 
@@ -75,11 +77,14 @@ public class Executer
   private void prepareNode(Node node)
   {
     NamedNodeMap attrs = node.getAttributes();
-    if (attrs != null && attrs.getLength() > 0)
+    if (attrs != null)
     {
-      Node qrepeat = attrs.getNamedItem("q:repeat");
-      if (qrepeat != null)
-        node.getAttributes().removeNamedItem(qrepeat.getNodeName());
+      for (int i = 0; i < attrs.getLength(); i++)
+      {
+        String attrName = attrs.item(i).getNodeName();
+        if (attrName.indexOf("q:") == 0)
+          attrs.removeNamedItem(attrName);
+      } 
     }
     
     Node child = node.getFirstChild();
@@ -88,11 +93,17 @@ public class Executer
     
     do
     {
+      Node nextSibling = child.getNextSibling();
       if (XmlUtils.isElement(child))
         prepareNode(child);
       else
         node.removeChild(child);
-    } while ((child = child.getNextSibling()) != null);
+      
+      child = nextSibling;
+      if (child == null)
+        break;
+      
+    } while (true);
   }
   
   private String findAndReplaceVarsInText(String text)
@@ -109,10 +120,22 @@ public class Executer
   private void findAndReplaceVarsInElement(Element ele)
   {
     NamedNodeMap attrs = ele.getAttributes();
-    for (int i = 0; i < attrs.getLength(); i++) 
+    if (attrs != null)
     {
-      Node attr = attrs.item(i);
-      attr.setNodeValue(findAndReplaceVarsInText(attr.getNodeValue()));
+      for (int i = 0; i < attrs.getLength(); i++) 
+      {
+        Node attr = attrs.item(i);
+        attr.setNodeValue(findAndReplaceVarsInText(attr.getNodeValue()));
+      }
+    }
+    
+    if (ele.getFirstChild() != null)
+    {
+      String nv = ele.getTextContent();
+      if (nv == null)
+        return;
+      
+      ele.setNodeValue(findAndReplaceVarsInText(nv));
     }
   }
   

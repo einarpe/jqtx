@@ -3,11 +3,20 @@
   <q:config>
     <q:query id="tables">select object_id, name from sys.tables order by name</q:query>
     <q:query id="columns">select name from sys.columns where object_id = ${tables.object_id}</q:query>
+    <q:query id="dummy"><![CDATA[with cte(x,y) as (
+                                  select 1 ,cast(sqrt(1) as decimal(19,6))
+                                  union all 
+                                  select x+1, cast(sqrt(x+1) as decimal(19,6))
+                                        from cte where x < 10 
+                                  ) select * from cte]]></q:query>
   </q:config>
   <q:xml>
     <database>
         <table name="${tables.name}" q:repeat="tables">
           <column name="${columns.name}" q:repeat="columns" />
+          <costam>
+            <sqrt q:repeat="dummy">x=${dummy.x}, y=${dummy.y}</sqrt>
+          </costam>
         </table>
     </database>
   </q:xml>

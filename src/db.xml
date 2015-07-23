@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<q:jqtx xmlns:q="http://localhost/q">
+  <q:config>
+    <q:query id="tables">select object_id, name from sys.tables order by name</q:query>
+    <q:query id="columns">select name from sys.columns where object_id = ${tables.object_id}</q:query>
+  </q:config>
+  <q:xml>
+    <database>
+        <table name="${tables.name}" q:repeat="tables">
+          <column name="${columns.name}" q:repeat="columns" />
+        </table>
+    </database>
+  </q:xml>
+</q:jqtx>

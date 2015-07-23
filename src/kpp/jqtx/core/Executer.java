@@ -96,7 +96,7 @@ public class Executer
       Node nextSibling = child.getNextSibling();
       if (XmlUtils.isElement(child))
         prepareNode(child);
-      else
+      else if (child.getNodeType() == Element.TEXT_NODE && child.getNodeValue().trim().isEmpty())
         node.removeChild(child);
       
       child = nextSibling;
@@ -129,13 +129,14 @@ public class Executer
       }
     }
     
-    if (ele.getFirstChild() != null)
+    Node firstChild = ele.getFirstChild(); 
+    if (firstChild != null)
     {
-      String nv = ele.getTextContent();
-      if (nv == null)
+      String nv = firstChild.getNodeValue();
+      if (nv == null || nv.trim().isEmpty())
         return;
       
-      ele.setNodeValue(findAndReplaceVarsInText(nv));
+      firstChild.setNodeValue(findAndReplaceVarsInText(nv));
     }
   }
   

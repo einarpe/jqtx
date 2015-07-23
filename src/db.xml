@@ -3,10 +3,10 @@
   <q:config>
     <q:query id="tables">select object_id, name from sys.tables order by name</q:query>
     <q:query id="columns">select name from sys.columns where object_id = ${tables.object_id}</q:query>
-    <q:query id="dummy"><![CDATA[with cte(x,y) as (
-                                  select 1 ,cast(sqrt(1) as decimal(19,6))
+    <q:query id="dummy"><![CDATA[with cte(x,y,l) as (
+                                  select 1 ,cast(sqrt(1) as decimal(19,6)), len('${tables.name}')
                                   union all 
-                                  select x+1, cast(sqrt(x+1) as decimal(19,6))
+                                  select x+1, cast(sqrt(x+1) as decimal(19,6)), len('${tables.name}')
                                         from cte where x < 10 
                                   ) select * from cte]]></q:query>
   </q:config>
@@ -14,8 +14,8 @@
     <database>
         <table name="${tables.name}" q:repeat="tables">
           <column name="${columns.name}" q:repeat="columns" />
-          <costam>
-            <sqrt q:repeat="dummy">x=${dummy.x}, y=${dummy.y}</sqrt>
+          <costam q:if="${tables.name}.contains('common_')">
+            <sqrt q:repeat="dummy">x=${dummy.x}, y=${dummy.y}, len(${tables.name}) = ${dummy.l}</sqrt>
           </costam>
         </table>
     </database>
